@@ -1,4 +1,4 @@
-android-res-gen
-===============
+mocktrofit-processor
+====================
 
-Automatic res exporter plugin for android projects
+[Mocktrofit](https://github.com/vokal/Mocktrofit) mock file pre-processor gradle plugin to work around filename character limit imposed by Android AAPT

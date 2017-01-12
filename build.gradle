@@ -1,18 +1,10 @@
 buildscript {
     repositories {
         jcenter()
-        maven {
-            url 'http://vokal-repo.ngrok.com/artifactory/repo'
-            credentials {
-                username = "${artifactory_user}"
-                password = "${artifactory_password}"
-            }
-        }
     }
-}
-
-plugins {
-    id 'com.jfrog.artifactory' version '3.0.1' 
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0"
+    }
 }
 
 apply plugin: 'com.jfrog.artifactory'
@@ -20,7 +12,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 
 group = 'io.vokal.gradle'
-version = '0.1.2'
+version = '1.0.0'
 
 repositories {
     jcenter()
@@ -29,6 +21,16 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
 
 artifactory {
@@ -52,7 +54,17 @@ artifactory {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
+            groupId group
+            artifactId 'mocktrofit-processor'
+            version version
+            artifact "build/libs/Mocktrofit-Processor-${version}.jar"
+            artifact (sourcesJar) {
+                classifier = 'sources'
+            }
+            artifact javadocJar
         }
     }
 }
+
+artifactoryPublish.dependsOn('assemble', 'javadocJar', 'sourcesJar', 'generatePomFileForMavenJavaPublication')
+publish.dependsOn(artifactoryPublish)
